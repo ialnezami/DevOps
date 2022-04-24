@@ -1,0 +1,48 @@
+version: '3.5'
+
+services:
+
+  db-app:
+    image: mysql:5.7
+    networks:
+      - app-dev
+    container_name: db-app
+    environment:
+      - MYSQL_ROOT_PASSWORD=password 
+      - MYSQL_DATABASE=app
+      - MYSQL_USER=app_user 
+      - MYSQL_PASSWORD=app_user_pass
+    volumes:
+      - /srv/app/dbdata:/var/lib/mysql
+    ports:
+      - 8181:3306
+
+  api-app:
+    build: ./API
+    networks:
+      - app-dev
+    container_name: api-app
+    volumes:
+      - /srv/app/api:/usr/src/app
+    ports:
+      - 8182:3000
+    depends_on:
+      - db-app
+
+  ui-app:
+    build: ./UI
+    networks:
+      - app-dev
+    container_name: ui-app
+    volumes:
+      - /srv/app/ui:/usr/src/app
+    ports:
+      - 8183:3000
+    depends_on:
+      - db-app
+      - api-app
+
+networks:
+  app:
+  service-webproxy:
+    external: true

@@ -1,0 +1,55 @@
+version: '3.5'
+
+services:
+
+  db-app:
+    image: mysql:5.7
+    networks:
+      - app-dev
+    container_name: db-app
+    environment:
+      - MYSQL_ROOT_PASSWORD=password 
+      - MYSQL_DATABASE=app
+      - MYSQL_USER=app_user 
+      - MYSQL_PASSWORD=app_user_pass
+    volumes:
+      - /srv/app/dbdata:/var/lib/mysql
+    ports:
+      - 8181:3306
+
+  pma-app:
+    image: phpmyadmin/phpmyadmin
+    networks:
+      - app
+      - service-webproxy
+    container_name: pma-app
+    links:
+      - db-app
+    ports:
+      - 8282:80
+    environment:
+      - PMA_HOST=db-app
+      - PMA_PORT=3306
+      - PMA_ARBITRARY=1
+      - VIRTUAL_HOST=db.app.exemple.com
+    restart: always
+
+  web-app:
+    image: docker-registry.exemple.com:5000/info/app:latest
+    networks:
+      - app
+      - service-webproxy
+    container_name: web-app
+    links:
+      - db-app
+    volumes:
+      - ./www:/var/www/html
+    ports:
+      - 8989:8989
+    environment:
+      - VIRTUAL_HOST=app.exemple.com
+
+networks:
+  app:
+  service-webproxy:
+    external: true
