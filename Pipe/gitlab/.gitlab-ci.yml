@@ -1,0 +1,64 @@
+stages:
+  - .pre
+  - build
+  - test
+  - staging
+  - deploy
+
+variables:
+    FILENAME: 'build.txt'
+    S3_BUCKET: 's3://bucket-name'
+    APP_API_BASE_URL: 'http://localhost:8080'
+
+build -app:
+  stage: build
+  image: node:16-alpine
+  script:
+    - npm install
+    - npm run build
+
+
+  artifacts:
+    paths:
+      - "build"
+    expire_in: "1 month"
+ 
+test -app:
+  stage: test
+  image: node:16-alpine
+  script:
+    - npm install serve -g
+    - serve -s build
+    - apk add curl
+    - sleep 10
+    - curl -I localhost:3000 | grep "200 OK"
+unit tests:
+  stage: .pre
+  image: node:16-alpine
+  script:
+    - npm install
+    - npm test
+linter:
+  stage: .pre
+  image: node:16-alpine
+  script:
+    - npm install
+    - npm run lint
+
+  
+deploy to s3:
+    stage: deploy
+    image: 
+      name: amazon/aws-cli:latest
+      entrypoint: [""]
+    rules:
+      - if: $CI_COMMIT_REF_NAME == CI_DEFAULT_BRANCH
+    script:
+      - aws --version
+      - aws s3 sync build/ $S3_BUCKET/ --acl public-read --cache-control max-age=31536000,public
+
+production text:
+      stage: staging
+      image: curl:7.64.0
+      script:
+        - curl -I $APP_API_BASE_URL| grep "200 OK"
