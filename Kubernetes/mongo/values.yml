@@ -1,0 +1,6 @@
+name: my-app
+container: 
+  name: my-app
+  image: my-app:latest
+  ports:
+  - containerPort: 80
