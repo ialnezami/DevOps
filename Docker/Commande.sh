@@ -37,3 +37,5 @@ docker cp $5:/$6 $7
 docker exec -it $4 rm -rf $6
 #list file
 docker exec -it $4 ls -l $6x
+#to enter in shell mode
+docker exec -it id_container sh
