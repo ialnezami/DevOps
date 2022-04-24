@@ -33,3 +33,9 @@ kubens mynamespace
 kubectl config set-context --current --namespace=default
 #get ingress
 kubectl get ingress -n kubernetes-dashboard --watch
+#scale deployment
+kubectl scale deployment $7 --replicas=2
+#expos deployment
+kubectl expose deployment $8 --port=80 --target-port=8080 --type=NodePort
+#set image on pod
+kubectl set image deployment $9 $9=image:tag
